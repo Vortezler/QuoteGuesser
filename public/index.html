@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quote Sleuth</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- SCREEN: start -->
+    <section id="screen-start" class="screen">
+      <h1>🔍 Quote Sleuth</h1>
+      <p class="tagline">Who wrote it? Submit a quote, then guess who wrote everyone else's.</p>
+      <div class="card">
+        <h2>Host a game</h2>
+        <input id="hostName" maxlength="24" placeholder="Your name" />
+        <button id="btnHost" class="primary">Create Room</button>
+      </div>
+      <div class="card">
+        <h2>Join a game</h2>
+        <input id="joinCode" maxlength="4" placeholder="Room code" style="text-transform:uppercase" />
+        <input id="joinName" maxlength="24" placeholder="Your name" />
+        <button id="btnJoin" class="primary">Join Room</button>
+      </div>
+      <p id="startError" class="error"></p>
+    </section>
+
+    <!-- SCREEN: lobby / settings -->
+    <section id="screen-lobby" class="screen hidden">
+      <h1>Room <span id="roomCode" class="code"></span></h1>
+      <p class="hint">Share this code so friends can join on your WiFi or over the internet (see README for tunnel setup).</p>
+
+      <div class="card" id="hostSettingsCard">
+        <h2>Round settings <span class="hint-inline">(host only, editable between rounds)</span></h2>
+        <label>Scoring mode
+          <select id="scoringMode">
+            <option value="none">None — just for fun</option>
+            <option value="correct">Points for correct guesses</option>
+            <option value="fooling">Points for fooling others</option>
+            <option value="both">Both</option>
+          </select>
+        </label>
+        <div class="row" id="pointsRow">
+          <label>Points per correct guess
+            <input id="pointsCorrect" type="number" min="0" max="1000" />
+          </label>
+          <label>Points per player fooled
+            <input id="pointsFool" type="number" min="0" max="1000" />
+          </label>
+        </div>
+        <button id="btnStartRound" class="primary">Start Round</button>
+      </div>
+
+      <div class="card">
+        <h2>Players (<span id="playerCount"></span>)</h2>
+        <ul id="playerList" class="player-list"></ul>
+      </div>
+    </section>
+
+    <!-- SCREEN: submitting -->
+    <section id="screen-submitting" class="screen hidden">
+      <h1>Round <span id="roundNumSubmit"></span> — Submit your quote</h1>
+      <p class="hint">Type any quote — something you'd actually say, a famous line, whatever. Everyone will try to guess who wrote each one.</p>
+      <div class="card">
+        <textarea id="quoteText" maxlength="300" placeholder="Your quote..."></textarea>
+        <button id="btnSubmitQuote" class="primary">Submit Quote</button>
+        <p id="submitStatus" class="hint-inline"></p>
+      </div>
+      <p class="hint"><span id="submittedCount"></span> / <span id="totalPlayers"></span> submitted</p>
+      <button id="btnForceVoting" class="secondary hidden">Start Voting Now (host)</button>
+    </section>
+
+    <!-- SCREEN: voting -->
+    <section id="screen-voting" class="screen hidden">
+      <h1>Round <span id="roundNumVote"></span> — Quote <span id="quoteNumVote"></span>/<span id="quoteTotalVote"></span></h1>
+      <div class="card quote-card">
+        <p id="votingQuoteText" class="quote-text"></p>
+      </div>
+      <div id="votingArea"></div>
+      <p id="authorWaiting" class="hint hidden">This is your quote — sit tight while everyone else votes.</p>
+      <p class="hint"><span id="votedCount"></span> / <span id="eligibleVoters"></span> have voted</p>
+      <button id="btnForceReveal" class="secondary hidden">Reveal Now (host)</button>
+    </section>
+
+    <!-- SCREEN: reveal -->
+    <section id="screen-reveal" class="screen hidden">
+      <h1>Reveal!</h1>
+      <div class="card quote-card">
+        <p id="revealQuoteText" class="quote-text"></p>
+        <p class="reveal-author">Written by: <strong id="revealAuthor"></strong></p>
+      </div>
+      <ul id="revealVotes" class="vote-list"></ul>
+      <button id="btnNextQuote" class="primary hidden">Next Quote (host)</button>
+    </section>
+
+    <!-- SCREEN: round-end -->
+    <section id="screen-roundend" class="screen hidden">
+      <h1>Scoreboard</h1>
+      <ol id="scoreboard" class="scoreboard"></ol>
+      <div id="hostRoundEndControls" class="hidden">
+        <div class="card" id="hostSettingsCard2">
+          <h2>Round settings <span class="hint-inline">(adjust for next round)</span></h2>
+          <label>Scoring mode
+            <select id="scoringMode2">
+              <option value="none">None — just for fun</option>
+              <option value="correct">Points for correct guesses</option>
+              <option value="fooling">Points for fooling others</option>
+              <option value="both">Both</option>
+            </select>
+          </label>
+          <div class="row">
+            <label>Points per correct guess
+              <input id="pointsCorrect2" type="number" min="0" max="1000" />
+            </label>
+            <label>Points per player fooled
+              <input id="pointsFool2" type="number" min="0" max="1000" />
+            </label>
+          </div>
+        </div>
+        <button id="btnNextRound" class="primary">Start Next Round</button>
+      </div>
+      <p class="hint" id="waitHostHint">Waiting for the host to start the next round...</p>
+    </section>
+
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
