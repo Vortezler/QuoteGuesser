@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quote Sleuth</title>
+<title>QuoteGuesser</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,8 +11,10 @@
 
     <!-- SCREEN: start -->
     <section id="screen-start" class="screen">
-      <h1>🔍 Quote Sleuth</h1>
+      <h1>🔍 QuoteGuesser</h1>
       <p class="tagline">Who wrote it? Submit a quote, then guess who wrote everyone else's.</p>
+      <p id="reconnecting" class="hint hidden">Reconnecting to your last game…</p>
+      <div id="startForms">
       <div class="card">
         <h2>Host a game</h2>
         <input id="hostName" maxlength="24" placeholder="Your name" />
@@ -25,6 +27,7 @@
         <button id="btnJoin" class="primary">Join Room</button>
       </div>
       <p id="startError" class="error"></p>
+      </div>
     </section>
 
     <!-- SCREEN: lobby / settings -->

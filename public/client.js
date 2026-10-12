@@ -1,10 +1,45 @@
-const socket = io();
+const socket = io({
+  path: '/api/socket-io/socket.io',
+  transports: ['websocket'],
+});
 
+// Identity is a persistent playerId + token (not the raw socket id), so a
+// reconnect — expected periodically on Vercel, where a Function instance
+// can only hold a connection open for a few minutes — resumes the same
+// player instead of creating a new one.
 let myId = null;
 let isHost = false;
 let lastState = null;
 let selectedVoteTarget = null;
 let submittedThisRound = false;
+let mySession = loadSession(); // {code, playerId, token} | null
+
+function loadSession() {
+  try {
+    const raw = sessionStorage.getItem('quoteguesser:lastSession');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveSession(session) {
+  mySession = session;
+  try {
+    sessionStorage.setItem('quoteguesser:lastSession', JSON.stringify(session));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function clearSession() {
+  mySession = null;
+  try {
+    sessionStorage.removeItem('quoteguesser:lastSession');
+  } catch (e) {
+    /* ignore */
+  }
+}
 
 const screens = {
   start: document.getElementById('screen-start'),
@@ -20,6 +55,28 @@ function showScreen(name) {
   screens[name].classList.remove('hidden');
 }
 
+// On first load (or a dropped connection getting a fresh socket), try to
+// silently resume whatever room we were last in before showing the "host
+// or join" screen at all.
+if (mySession) {
+  document.getElementById('reconnecting').classList.remove('hidden');
+  document.getElementById('startForms').classList.add('hidden');
+}
+
+socket.on('connect', () => {
+  if (!mySession) return;
+  socket.emit('player:reconnect', mySession, (res) => {
+    if (res.ok) {
+      myId = res.playerId;
+      saveSession({ code: res.code, playerId: res.playerId, token: res.token });
+    } else {
+      clearSession();
+      document.getElementById('reconnecting').classList.add('hidden');
+      document.getElementById('startForms').classList.remove('hidden');
+    }
+  });
+});
+
 // ---------- Start screen ----------
 
 document.getElementById('btnHost').addEventListener('click', () => {
@@ -29,8 +86,8 @@ document.getElementById('btnHost').addEventListener('click', () => {
       document.getElementById('startError').textContent = res.error || 'Could not create room.';
       return;
     }
-    myId = socket.id;
-    isHost = true;
+    myId = res.playerId;
+    saveSession({ code: res.code, playerId: res.playerId, token: res.token });
   });
 });
 
@@ -46,7 +103,8 @@ document.getElementById('btnJoin').addEventListener('click', () => {
       document.getElementById('startError').textContent = res.error || 'Could not join room.';
       return;
     }
-    myId = socket.id;
+    myId = res.playerId;
+    saveSession({ code: res.code, playerId: res.playerId, token: res.token });
   });
 });
 
@@ -118,8 +176,7 @@ document.getElementById('btnNextQuote').addEventListener('click', () => {
 
 socket.on('room:state', (state) => {
   lastState = state;
-  myId = socket.id;
-  isHost = state.hostId === myId;
+  isHost = myId !== null && state.hostId === myId;
   render(state);
 });
 

@@ -1,7 +1,7 @@
 {
-  "name": "quote-sleuth",
+  "name": "quoteguesser",
   "version": "1.0.0",
-  "description": "Guess-who-wrote-the-quote party game. Locally hosted, join codes, no accounts.",
+  "description": "Guess-who-wrote-the-quote party game. Self-hostable, or deployable to Vercel with Redis for shared room state. No accounts.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
     "express": "^5.3.0",
+    "ioredis": "^5.4.1",
     "socket.io": "^4.8.4"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/socket-io.js": {
+      "maxDuration": 300
+    }
+  }
+}
